@@ -1,0 +1,32 @@
+name: Auto Update MailFlow
+
+on:
+  workflow_dispatch:
+    inputs:
+      file_url:
+        description: 'Direct URL to the new index.html file'
+        required: true
+        type: string
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Download new index.html
+        run: |
+          curl -L "${{ github.event.inputs.file_url }}" -o index.html
+          echo "File downloaded successfully"
+          wc -c index.html
+
+      - name: Commit and push
+        run: |
+          git config --global user.name "MailFlow Auto Update"
+          git config --global user.email "auto@mailflow.app"
+          git add index.html
+          git commit -m "Auto update from Claude AI"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
